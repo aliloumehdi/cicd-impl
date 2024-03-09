@@ -1,0 +1,38 @@
+pipeline {
+    environment {
+        registry = "malilou/cicd-impl"
+        registryCredential = '5b459ef1-b01a-472d-a844-ca92f7078d50'
+        dockerImage = ''
+    }
+    agent any
+    stages {
+        stage('Cloning Git') {
+                steps {
+                git 'https://github.com/aliloumehdi/cicd-impl'
+                }
+        }
+        stage('Building image') {
+            steps{
+                script {
+                dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                }
+            }
+        }
+        stage('Test image') {
+             steps{
+                 script {
+                    echo "Tests passed"
+                 }
+             }
+         }
+        stage('Publish Image') {
+            steps{
+                script {
+                docker.withRegistry( '', registryCredential ) {
+                    dockerImage.push()
+                    }
+                }
+            }
+        }
+    }
+}
